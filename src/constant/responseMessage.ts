@@ -5,6 +5,7 @@ export default {
     UNAUTHORIZED: 'You are not authorized to access this resource',
     FORBIDDEN: 'You are not allowed to access this resource',
     INTERNAL_SERVER_ERROR: 'Internal server error',
+    TOO_MANY_REQUESTS: 'Too many requests',
     NOT_FOUND: (entity: string) => {
         return `The ${entity} was not found`
     },
