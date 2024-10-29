@@ -1,5 +1,3 @@
- 
- 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { createLogger, format, transports } from 'winston'
@@ -10,6 +8,8 @@ import { magenta, red, blue, yellow, green } from 'ansi-colors'
 import util from 'util'
 import path from 'path'
 import * as sourceMapSupport from 'source-map-support'
+import 'winston-mongodb'
+import { MongoDBTransportInstance } from 'winston-mongodb'
 
 //Linking trace suport
 sourceMapSupport.install()
@@ -61,6 +61,7 @@ const consoleTransport = (): Array<ConsoleTransportInstance> => {
 }
 
 const fileLogFormat = format.printf((info) => {
+
     const { level, message, timestamp, meta = {} } = info
 
     const logMeta: Record<string, unknown> = {}
@@ -80,9 +81,9 @@ const fileLogFormat = format.printf((info) => {
 
     const logData = {
         level: level.toUpperCase(),
-
+       
         message,
-
+         
         timestamp,
         meta: logMeta
     }
@@ -90,7 +91,7 @@ const fileLogFormat = format.printf((info) => {
     return JSON.stringify(logData, null, 4)
 })
 
-const fileTransport = (): Array<FileTransportInstance> => {
+const FileTransport = (): Array<FileTransportInstance> => {
     return [
         new transports.File({
             filename: path.join(__dirname, '../', '../', 'logs', `${config.ENV}.log`),
@@ -100,10 +101,25 @@ const fileTransport = (): Array<FileTransportInstance> => {
     ]
 }
 
+const MongodbTransport = (): Array<MongoDBTransportInstance> => {
+    return [
+        new transports.MongoDB({
+            level: 'info',
+            db: config.DATABASE_URL as string,
+            metaKey: 'meta',
+            expireAfterSeconds: 3600 * 24 * 30,
+            options: {
+                useUnifiedTopology: true
+            },
+            collection: 'application-logs'
+        })
+    ]
+}
+
 export default createLogger({
     defaultMeta: {
         meta: {}
     },
-    transports: [...fileTransport(), ...consoleTransport()]
+    transports: [...FileTransport(), ...MongodbTransport(), ...consoleTransport()]
 })
 
