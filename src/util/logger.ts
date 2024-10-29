@@ -1,12 +1,18 @@
+ 
+ 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
- 
- 
+
 import { createLogger, format, transports } from 'winston'
-import { ConsoleTransportInstance } from 'winston/lib/winston/transports'
+import { ConsoleTransportInstance, FileTransportInstance } from 'winston/lib/winston/transports'
 import { EApplicationEnvironment } from '../constant/application'
 import config from '../config/config'
 import { magenta, red, blue, yellow, green } from 'ansi-colors'
 import util from 'util'
+import path from 'path'
+import * as sourceMapSupport from 'source-map-support'
+
+//Linking trace suport
+sourceMapSupport.install()
 
 const colorizeLevel = (level: string) => {
     switch (level) {
@@ -54,10 +60,50 @@ const consoleTransport = (): Array<ConsoleTransportInstance> => {
     return []
 }
 
+const fileLogFormat = format.printf((info) => {
+    const { level, message, timestamp, meta = {} } = info
+
+    const logMeta: Record<string, unknown> = {}
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    for (const [key, value] of Object.entries(meta)) {
+        if (value instanceof Error) {
+            logMeta[key] = {
+                name: value.name,
+                message: value.message,
+                trace: value.stack || ''
+            }
+        } else {
+            logMeta[key] = value
+        }
+    }
+
+    const logData = {
+        level: level.toUpperCase(),
+
+        message,
+
+        timestamp,
+        meta: logMeta
+    }
+
+    return JSON.stringify(logData, null, 4)
+})
+
+const fileTransport = (): Array<FileTransportInstance> => {
+    return [
+        new transports.File({
+            filename: path.join(__dirname, '../', '../', 'logs', `${config.ENV}.log`),
+            level: 'info',
+            format: format.combine(format.timestamp(), fileLogFormat)
+        })
+    ]
+}
+
 export default createLogger({
     defaultMeta: {
         meta: {}
     },
-    transports: [...consoleTransport()]
+    transports: [...fileTransport(), ...consoleTransport()]
 })
 
