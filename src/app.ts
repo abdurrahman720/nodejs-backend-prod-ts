@@ -27,7 +27,6 @@ app.use(express.static(path.join(__dirname, '../public')))
 app.use('/api/v1', router)
 
 //404 handler
-
 app.use((req: Request, _: Response, next: NextFunction) => {
     try {
         throw new Error(responseMessage.NOT_FOUND('route'))

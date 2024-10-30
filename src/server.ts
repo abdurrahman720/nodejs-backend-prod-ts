@@ -10,7 +10,6 @@ const server = app.listen(config.PORT)
 ;(async () => {
     try {
         //Database Connection
-
         const connection = await databaseService.connect()
         logger.info('Database_Connected', {
             meta: {
@@ -18,6 +17,7 @@ const server = app.listen(config.PORT)
             }
         })
 
+        //Rate Limiter
         initRateLimiter(connection)
         logger.info('RateLimiter_Initialized')
 

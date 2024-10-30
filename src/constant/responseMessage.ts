@@ -1,6 +1,19 @@
-export default {
+interface StatusMessages {
+    SUCCESS: string
+    SOMETHING_WENT_WRONG: string
+    UNAUTHORIZED: string
+    FORBIDDEN: string
+    INTERNAL_SERVER_ERROR: string
+    TOO_MANY_REQUESTS: string
+    NOT_FOUND: (entity: string) => string
+    BAD_REQUEST: (entity: string) => string
+    CONFLICT: (entity: string) => string
+    UNPROCESSABLE_ENTITY: (entity: string) => string
+}
+
+const responseMessages: StatusMessages = {
     SUCCESS: 'The request was successful',
-    SOMETHNG_WENT_WRONG: 'Something went wrong',
+    SOMETHING_WENT_WRONG: 'Something went wrong',
 
     UNAUTHORIZED: 'You are not authorized to access this resource',
     FORBIDDEN: 'You are not allowed to access this resource',
@@ -19,4 +32,6 @@ export default {
         return `The ${entity} is invalid`
     }
 }
+
+export default responseMessages
 
